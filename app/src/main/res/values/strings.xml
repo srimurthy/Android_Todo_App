@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">My ToDo App</string>
+    <string name="action_settings">Settings</string>
+    <string name="add_button_text">Add</string>
+    <string name="add_task_textfield">Add a new item.</string>
+
+</resources>
