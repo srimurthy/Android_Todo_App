@@ -1,5 +1,6 @@
 package com.srimurthy.android_todo_app;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -9,6 +10,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import org.apache.commons.io.FileUtils;
 
@@ -25,6 +28,8 @@ public class TodoActivity extends ActionBarActivity {
     private EditText taskInputTextView;
     private ListView listView;
 
+    private final int REQUEST_CODE = 200;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +43,17 @@ public class TodoActivity extends ActionBarActivity {
     }
 
     private void setupListViewListener() {
+
+        this.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(TodoActivity.this, EditTaskActivity.class);
+                intent.putExtra("task_position",position);
+                intent.putExtra("task_text", ((TextView)view).getText());
+                startActivityForResult(intent, REQUEST_CODE);
+            }
+        });
+
         this.listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -47,6 +63,25 @@ public class TodoActivity extends ActionBarActivity {
                 return true;
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
+            int position = data.getExtras().getInt("task_position");
+            String originalTaskText = this.todoItemsList.get(position);
+            String editedTaskText = data.getExtras().getString("edited_task_text");
+
+            if(originalTaskText.equals(editedTaskText)) {
+                //Nothing to update
+                return;
+            }
+
+            TodoActivity.this.todoItemsList.remove(position);
+            TodoActivity.this.todoItemsList.add(position,editedTaskText);
+            TodoActivity.this.todoArrayAdapter.notifyDataSetChanged();
+            writeItems();
+        }
     }
 
     private void readItems() {
